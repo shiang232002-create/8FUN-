@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台北爽玩團 🚀 (捷運版)</title>
+    <title>台北爽玩團 🚀 (捷運最終版)</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
+            /* 主題色調維持不變，但地圖背景變淺色 */
             --primary: #FF0055;
             --secondary: #00E5FF;
             --bg: #0F172A;
@@ -18,18 +19,57 @@
             --text: #F8FAFC;
         }
 
-        * { box-sizing: border-box; }
-
+        /* 為了讓捷運線更清楚，將頁面容器改為白底，卡片維持深色 */
         body, html {
             height: 100%;
             margin: 0;
             font-family: 'Noto Sans TC', sans-serif;
-            background: var(--bg);
+            background: #f1f5f9; /* 淺色背景 */
             color: var(--text);
             overflow: hidden; 
         }
+        
+        /* 列表頁的內容必須是深色文字 */
+        #page-list h1, #page-team h1 {
+             /* 讓標題顏色漸變 */
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* 讓列表頁的字體變回深色 */
+        #page-list, #page-team {
+            color: #1e293b; 
+        }
+        
+        /* 行程卡片內的文字維持亮色 */
+        .timeline-card {
+            background: var(--card-bg);
+            color: var(--text); 
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
 
-        /* --- 頁面容器與切換邏輯 (與 Vibe 2.0 相同) --- */
+        .timeline-card p {
+            color: #94A3B8;
+        }
+        
+        .page {
+            /* 淺色頁面背景 */
+            background: #f1f5f9; 
+        }
+
+        /* Map Styles override */
+        #map { height: 100%; width: 100%; }
+        /* 讓地圖上的彈出卡片維持 Vibe 風格 */
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip { 
+            background: var(--card-bg); 
+            color: var(--text);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 其餘 Vibe App 2.0 樣式... (略) */
+        /* --- 頁面容器與切換邏輯 --- */
         .page {
             position: absolute;
             top: 0;
@@ -53,7 +93,7 @@
             height: calc(100% - 70px);
         }
 
-        /* --- 底部導航列 (與 Vibe 2.0 相同) --- */
+        /* --- 底部導航列 --- */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -90,31 +130,8 @@
             font-size: 1.5rem;
             margin-bottom: 4px;
         }
-
-        /* --- 行程卡片樣式 (列表頁) --- */
-        .timeline-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            position: relative;
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-
-        .timeline-card h3 { margin: 0 0 5px 0; }
-        .timeline-card p { color: #94A3B8; font-size: 0.9rem; margin: 0; }
-        .tag { 
-            background: rgba(255, 0, 85, 0.15); 
-            color: var(--primary); 
-            padding: 2px 8px; 
-            border-radius: 4px; 
-            font-size: 0.75rem; 
-            margin-bottom: 8px; 
-            display: inline-block;
-        }
-
-        /* --- 成員頁面樣式 (與 Vibe 2.0 相同) --- */
+        
+        /* --- 成員頁面樣式 --- */
         .team-header {
             text-align: center;
             margin-bottom: 30px;
@@ -153,6 +170,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            color: var(--text); /* 確保成員列表文字是亮的 */
         }
         .avatar {
             width: 40px;
@@ -164,11 +182,9 @@
             justify-content: center;
             font-weight: bold;
             font-size: 1.2rem;
+            color: var(--bg);
         }
-        
-        /* Map Styles override */
-        #map { height: 100%; width: 100%; }
-        .leaflet-popup-content-wrapper { background: var(--card-bg); color: var(--text); }
+
         .vibe-btn { 
             display: block; margin-top:10px; text-align: center; 
             background: var(--secondary); color: #000 !important; 
@@ -183,7 +199,8 @@
         <h1 style="text-align: center; margin-bottom: 30px;">📅 行程總覽</h1>
         <div id="timeline-container">
             </div>
-        <div style="height: 50px;"></div> </div>
+        <div style="height: 50px;"></div>
+    </div>
 
     <div id="page-map" class="page">
         <div id="map"></div>
@@ -192,7 +209,7 @@
     <div id="page-team" class="page">
         <div class="team-header">
             <h1>👥 爽玩小隊</h1>
-            <p>輸入名字加入行程，並分享給朋友</p>
+            <p style="color:#475569">輸入名字加入行程，並分享給朋友</p>
         </div>
 
         <div class="input-group">
@@ -207,7 +224,7 @@
             <button class="btn-primary" style="background: var(--secondary); color: #000; width: 100%;" onclick="shareApp()">
                 📤 複製連結分享給朋友
             </button>
-            <p style="font-size: 0.8rem; color: #64748B; margin-top: 10px;">
+            <p style="font-size: 0.8rem; color: #475569; margin-top: 10px;">
                 (此連結可讓朋友開啟此 App)
             </p>
         </div>
@@ -230,16 +247,17 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 資料設定 (包含拍貼機) ---
+        // --- 資料設定 (增加大創，並調整順序) ---
         const itinerary = [
             { title: "1. 台北車站 (集合)", time: "Start", tag: "集合點", desc: "走中山地下街R線往中山站出發", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
-            { title: "2. 誠品生活南西店", time: "Stop 1", tag: "逛街", desc: "Haruko 快閃店。逛完搭捷運至西門站", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
-            { title: "3. 韓式拍貼機", time: "Stop 2", tag: "拍照留念", desc: "到西門町後，先拍貼留下美美的造型！", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" },
-            { title: "4. MEAT IN 燒肉", time: "Stop 3", tag: "晚餐", desc: "西門店燒肉放題，吃飽飽準備唱歌", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
-            { title: "5. 錢櫃 KTV", time: "Stop 4", tag: "派對", desc: "中華新館，唱到開心為止！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
+            { title: "2. 大創 (DAISO)", time: "Stop 1", tag: "購物", desc: "新光三越南西店本館，先補給小物！", lat: 25.0519, lng: 121.5209, mapQ: "大創 新光三越南西店" }, 
+            { title: "3. 誠品生活南西店", time: "Stop 2", tag: "逛街", desc: "Haruko 快閃店。逛完從中山站搭捷運至西門站", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
+            { title: "4. 韓式拍貼機", time: "Stop 3", tag: "拍照留念", desc: "到西門町後，先拍貼留下美美的造型！", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" },
+            { title: "5. MEAT IN 燒肉", time: "Stop 4", tag: "晚餐", desc: "西門店燒肉放題，吃飽飽準備唱歌", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
+            { title: "6. 錢櫃 KTV", time: "Stop 5", tag: "派對", desc: "中華新館，唱到開心為止！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
         ];
 
-        // --- 1. 初始化行程列表 (略過) ---
+        // --- 1. 初始化行程列表 ---
         const listContainer = document.getElementById('timeline-container');
         itinerary.forEach(item => {
             listContainer.innerHTML += `
@@ -251,22 +269,22 @@
             `;
         });
 
-        // --- 2. 初始化地圖 (增加捷運圖層！) ---
+        // --- 2. 初始化地圖 (關鍵修正：改用淺色地圖與調整捷運線圖層) ---
         const map = L.map('map').setView([25.048, 121.513], 15);
         
-        // 載入深色底圖
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© CARTO'
+        // ★ 關鍵修正：改用 OSM 淺色地圖，讓捷運線更清晰
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
         }).addTo(map);
 
-        // ★ 新增捷運/鐵道圖層 (Layer 2)
+        // ★ 捷運/鐵道圖層 (提高不透明度)
         L.tileLayer('https://tile.openstreetmap.tw/rail/{z}/{x}/{y}.png', {
             maxZoom: 18,
-            opacity: 0.9,
+            opacity: 1, // 提高不透明度，讓線路更明顯
             attribution: '捷運圖層: OpenStreetMap Taiwan Rail'
         }).addTo(map);
 
-        const customIconHtml = `<div style="width:20px;height:20px;background:var(--primary);border-radius:50%;border:3px solid #1E293B;box-shadow:0 0 10px var(--primary);"></div>`;
+        const customIconHtml = `<div style="width:20px;height:20px;background:var(--primary);border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px var(--primary);"></div>`;
         const icon = L.divIcon({ className: 'custom-pin', html: customIconHtml, iconSize: [20, 20] });
 
         itinerary.forEach(item => {
@@ -279,7 +297,7 @@
             `);
         });
 
-        // --- 3. 頁面切換邏輯 (與 Vibe 2.0 相同) ---
+        // --- 3. 頁面切換邏輯 ---
         function switchTab(tabName, navEl) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -292,7 +310,7 @@
             }
         }
 
-        // --- 4. 成員功能 (與 Vibe 2.0 相同) ---
+        // --- 4. 成員功能 ---
         const memberListEl = document.getElementById('memberList');
         let members = JSON.parse(localStorage.getItem('trip_members')) || ['我 (主揪)'];
         renderMembers();
