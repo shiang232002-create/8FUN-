@@ -61,7 +61,7 @@
             -webkit-text-fill-color: transparent;
         }
         
-        /* 列表頁的輔助文字顏色 */
+        /* 成員頁的輔助文字顏色 */
         #page-info p {
             color: #94A3B8;
         }
@@ -128,11 +128,26 @@
             display: inline-block;
         }
 
-        /* --- 行前須知頁面樣式 (NEW) --- */
+        /* --- 行前須知頁面樣式 --- */
         .info-header {
             text-align: center;
             margin-bottom: 30px;
         }
+
+        /* NEW: 圖片樣式 */
+        .image-header {
+            width: calc(100% + 40px); /* 撐滿整個頁面寬度 */
+            margin: -20px -20px 20px -20px; /* 移除左右和上方的 padding */
+            overflow: hidden;
+            border-bottom: 4px solid var(--secondary);
+        }
+        .image-header img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        /* END NEW */
+        
         .member-list {
             list-style: none;
             padding: 0;
@@ -194,7 +209,12 @@
     </div>
 
     <div id="page-info" class="page">
-        <div class="info-header">
+        
+        <div class="image-header">
+            <img src="https://i.imgur.com/your_image_url.jpg" alt="Sanrio Family 三麗鷗明星介紹">
+        </div>
+
+        <div class="info-header" style="margin-top: 20px;">
             <h1>📋 行前須知 / 提醒</h1>
             <p>請各位隊員確認自己的任務與裝扮！</p>
         </div>
@@ -232,19 +252,19 @@
         // --- 資料設定 (最終版) ---
         const itinerary = [
             { title: "1. 台北車站 (集合)", time: "Start", tag: "集合點", desc: "走中山地下街R線往中山站出發", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
-            { title: "2. 大創 (DAISO)", time: "Stop 1", tag: "購物", desc: "新光三越南西店本館，舉辦第一屆8FUN大創百元交換禮物大賽", lat: 25.0519, lng: 121.5209, mapQ: "大創 新光三越南西店" }, 
+            { title: "2. 大創 (DAISO)", time: "Stop 1", tag: "購物", desc: "新光三越南西店本館，先補給小物！", lat: 25.0519, lng: 121.5209, mapQ: "大創 新光三越南西店" }, 
             { title: "3. 誠品生活南西店", time: "Stop 2", tag: "逛街", desc: "Haruko 快閃店。逛完從中山站搭捷運至西門站", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
             { title: "4. 韓式拍貼機", time: "Stop 3", tag: "拍照留念", desc: "到西門町後，先拍貼留下美美的造型！", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" },
             { title: "5. MEAT IN 燒肉", time: "Stop 4", tag: "晚餐", desc: "西門店燒肉放題，吃飽飽準備唱歌", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
             { title: "6. 錢櫃 KTV", time: "Stop 5", tag: "派對", desc: "中華新館，唱到開心為止！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
         ];
 
-        // --- 行前須知資料 (NEW) ---
+        // --- 行前須知資料 ---
         const reminders = [
             { name: "壽司小朋友 (酷企鵝)", note: "無特別任務。", icon: "😎" },
             { name: "嘟嘟號 (山姆企鵝)", note: "需帶 <span class='warning'>3 人份髮夾</span> 前往。", icon: "🐧" },
             { name: "湯包 (大眼蛙)", note: "無特別任務。", icon: "🐸" },
-            { name: "小白 (庫洛米)", note: "<span class='warning'>注意！</span>沒裝扮要罰 500 元。", icon: "😈" }
+            { name: "小白 (庫洛米)", note: "<span class='warning'>注意！</span>沒裝扮要罰 500 元。", icon: "😈" },
             { name: "小桃 (美樂蒂)", note: "無特別任務", icon: "🎀🐰" }
         ];
 
@@ -286,8 +306,9 @@
             `);
         });
 
-        // --- 3. 初始化行前須知列表 (NEW) ---
+        // --- 3. 初始化行前須知列表 ---
         const reminderListEl = document.getElementById('reminderList');
+        reminderListEl.innerHTML = '';
         reminders.forEach(r => {
             reminderListEl.innerHTML += `
                 <li class="reminder-item">
@@ -298,12 +319,11 @@
         });
 
 
-        // --- 4. 頁面切換邏輯 (頁面 ID 需使用 'info') ---
+        // --- 4. 頁面切換邏輯 ---
         function switchTab(tabName, navEl) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
-            // 使用動態 ID 獲取頁面
             document.getElementById(`page-${tabName}`).classList.add('active');
             navEl.classList.add('active');
 
@@ -312,7 +332,7 @@
             }
         }
 
-        // --- 5. 分享功能 (與 Vibe 4.0 相同) ---
+        // --- 5. 分享功能 ---
         function shareApp() {
             const url = window.location.href;
             navigator.clipboard.writeText(url).then(() => {
@@ -324,4 +344,3 @@
     </script>
 </body>
 </html>
-
