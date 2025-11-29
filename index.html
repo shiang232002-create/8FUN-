@@ -55,19 +55,19 @@
         }
 
         /* 標題漸變色 */
-        #page-list h1, #page-team h1 {
+        #page-list h1, #page-info h1 {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         
-        /* 成員頁的輔助文字顏色 */
-        #page-team p {
+        /* 列表頁的輔助文字顏色 */
+        #page-info p {
             color: #94A3B8;
         }
 
 
-        /* --- 底部導航列 (與 Vibe 4.0 相同) --- */
+        /* --- 底部導航列 --- */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -105,7 +105,7 @@
             margin-bottom: 4px;
         }
 
-        /* --- 行程卡片樣式 (與 Vibe 4.0 相同) --- */
+        /* --- 行程卡片樣式 --- */
         .timeline-card {
             background: var(--card-bg);
             color: var(--text); 
@@ -128,58 +128,39 @@
             display: inline-block;
         }
 
-        /* --- 成員頁面樣式 (與 Vibe 4.0 相同) --- */
-        .team-header {
+        /* --- 行前須知頁面樣式 (NEW) --- */
+        .info-header {
             text-align: center;
             margin-bottom: 30px;
-        }
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0F172A;
-            color: white;
-        }
-        button.btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
         }
         .member-list {
             list-style: none;
             padding: 0;
         }
-        .member-item {
+        /* Item style now used for reminders */
+        .reminder-item {
             background: var(--card-bg);
             padding: 15px;
             border-radius: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: var(--text); 
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        .avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .member-name {
             font-weight: bold;
-            font-size: 1.2rem;
-            color: var(--bg);
+            font-size: 1.1rem;
+            color: var(--secondary); /* 名字用亮色 */
+            margin-bottom: 5px;
+        }
+        .note {
+            font-size: 0.95rem;
+            color: var(--text);
+            padding-left: 10px;
+            border-left: 3px solid var(--primary);
+            margin-top: 8px;
+        }
+        .warning {
+             color: #FF7700; /* 警告色 */
+             font-weight: bold;
         }
 
         /* Map Styles override */
@@ -212,27 +193,22 @@
         <div id="map"></div>
     </div>
 
-    <div id="page-team" class="page">
-        <div class="team-header">
-            <h1>👥 爽玩小隊</h1>
-            <p>輸入名字加入行程，並分享給朋友</p>
+    <div id="page-info" class="page">
+        <div class="info-header">
+            <h1>📋 行前須知 / 提醒</h1>
+            <p>請各位隊員確認自己的任務與裝扮！</p>
         </div>
 
-        <div class="input-group">
-            <input type="text" id="nameInput" placeholder="你的暱稱...">
-            <button class="btn-primary" onclick="addMember()">加入</button>
-        </div>
-
-        <ul class="member-list" id="memberList">
+        <ul class="member-list" id="reminderList">
             </ul>
-
+        
         <div style="margin-top: 30px; text-align: center;">
-            <button class="btn-primary" style="background: var(--secondary); color: #000; width: 100%;" onclick="shareApp()">
-                📤 複製連結分享給朋友
-            </button>
-            <p style="font-size: 0.8rem; color: #94A3B8; margin-top: 10px;">
-                (此連結可讓朋友開啟此 App)
+            <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 10px;">
+                點擊下方連結可複製此行程網址給其他隊友
             </p>
+            <button class="btn-primary" style="background: var(--secondary); color: #000; width: 100%;" onclick="shareApp()">
+                📤 複製連結分享給隊友
+            </button>
         </div>
     </div>
 
@@ -245,9 +221,9 @@
             <div class="nav-icon">🗺️</div>
             <div>地圖</div>
         </div>
-        <div class="nav-item" onclick="switchTab('team', this)">
-            <div class="nav-icon">👥</div>
-            <div>成員</div>
+        <div class="nav-item" onclick="switchTab('info', this)">
+            <div class="nav-icon">📋</div>
+            <div>須知</div>
         </div>
     </nav>
 
@@ -263,6 +239,15 @@
             { title: "6. 錢櫃 KTV", time: "Stop 5", tag: "派對", desc: "中華新館，唱到開心為止！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
         ];
 
+        // --- 行前須知資料 (NEW) ---
+        const reminders = [
+            { name: "壽司小朋友 (酷企鵝)", note: "無特別任務。", icon: "😎" },
+            { name: "嘟嘟號 (山姆企鵝)", note: "需帶 <span class='warning'>3 人份髮夾</span> 前往。", icon: "🐧" },
+            { name: "湯包 (大眼蛙)", note: "無特別任務。", icon: "🐸" },
+            { name: "小白 (庫洛米)", note: "<span class='warning'>注意！</span>沒裝扮要罰 500 元。", icon: "😈" }
+            { name: "小桃 (美樂蒂)", note: "無特別任務", icon: "🎀🐰" }
+        ];
+
         // --- 1. 初始化行程列表 ---
         const listContainer = document.getElementById('timeline-container');
         itinerary.forEach(item => {
@@ -274,16 +259,14 @@
                 </div>
             `;
         });
-
-        // --- 2. 初始化地圖 (保留淺色底圖以顯示深色捷運線) ---
+        
+        // --- 2. 初始化地圖 ---
         const map = L.map('map').setView([25.048, 121.513], 15);
         
-        // 保留 OSM 淺色地圖底圖，讓捷運線清晰可見
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
         }).addTo(map);
 
-        // 捷運/鐵道圖層
         L.tileLayer('https://tile.openstreetmap.tw/rail/{z}/{x}/{y}.png', {
             maxZoom: 18,
             opacity: 1, 
@@ -303,11 +286,24 @@
             `);
         });
 
-        // --- 3. 頁面切換邏輯 ---
+        // --- 3. 初始化行前須知列表 (NEW) ---
+        const reminderListEl = document.getElementById('reminderList');
+        reminders.forEach(r => {
+            reminderListEl.innerHTML += `
+                <li class="reminder-item">
+                    <div class="member-name">${r.icon} ${r.name}</div>
+                    <div class="note">${r.note}</div>
+                </li>
+            `;
+        });
+
+
+        // --- 4. 頁面切換邏輯 (頁面 ID 需使用 'info') ---
         function switchTab(tabName, navEl) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
+            // 使用動態 ID 獲取頁面
             document.getElementById(`page-${tabName}`).classList.add('active');
             navEl.classList.add('active');
 
@@ -316,42 +312,13 @@
             }
         }
 
-        // --- 4. 成員功能 ---
-        const memberListEl = document.getElementById('memberList');
-        let members = JSON.parse(localStorage.getItem('trip_members')) || ['我 (主揪)'];
-        renderMembers();
-
-        function addMember() {
-            const input = document.getElementById('nameInput');
-            const name = input.value.trim();
-            if(name) {
-                members.push(name);
-                localStorage.setItem('trip_members', JSON.stringify(members));
-                renderMembers();
-                input.value = '';
-                alert(`歡迎 ${name} 加入行程！`);
-            }
-        }
-
-        function renderMembers() {
-            memberListEl.innerHTML = '';
-            members.forEach(m => {
-                const initial = m.charAt(0).toUpperCase();
-                memberListEl.innerHTML += `
-                    <li class="member-item">
-                        <div class="avatar">${initial}</div>
-                        <span>${m}</span>
-                    </li>
-                `;
-            });
-        }
-
+        // --- 5. 分享功能 (與 Vibe 4.0 相同) ---
         function shareApp() {
             const url = window.location.href;
             navigator.clipboard.writeText(url).then(() => {
-                alert('連結已複製！貼給朋友叫他們加入！');
+                alert('行程連結已複製！');
             }).catch(err => {
-                prompt("請複製此連結傳給朋友：", url);
+                prompt("請複製此連結傳給隊友：", url);
             });
         }
     </script>
