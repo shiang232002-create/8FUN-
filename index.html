@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台北爽玩團 🚀</title>
+    <title>台北爽玩團 🚀 (捷運版)</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
@@ -26,18 +26,18 @@
             font-family: 'Noto Sans TC', sans-serif;
             background: var(--bg);
             color: var(--text);
-            overflow: hidden; /* Prevent body scroll, handle inside pages */
+            overflow: hidden; 
         }
 
-        /* --- 頁面容器與切換邏輯 --- */
+        /* --- 頁面容器與切換邏輯 (與 Vibe 2.0 相同) --- */
         .page {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: calc(100% - 70px); /* Leave space for bottom nav */
+            height: calc(100% - 70px); 
             overflow-y: auto;
-            display: none; /* Hidden by default */
+            display: none; 
             padding: 20px;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -48,13 +48,12 @@
             opacity: 1;
         }
 
-        /* 特別處理地圖頁面，不需要 padding */
         #page-map {
             padding: 0;
             height: calc(100% - 70px);
         }
 
-        /* --- 底部導航列 --- */
+        /* --- 底部導航列 (與 Vibe 2.0 相同) --- */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -115,7 +114,7 @@
             display: inline-block;
         }
 
-        /* --- 成員頁面樣式 --- */
+        /* --- 成員頁面樣式 (與 Vibe 2.0 相同) --- */
         .team-header {
             text-align: center;
             margin-bottom: 30px;
@@ -231,37 +230,43 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-     // --- 資料設定 (更新後的版本) ---
+        // --- 資料設定 (包含拍貼機) ---
         const itinerary = [
             { title: "1. 台北車站 (集合)", time: "Start", tag: "集合點", desc: "走中山地下街R線往中山站出發", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
             { title: "2. 誠品生活南西店", time: "Stop 1", tag: "逛街", desc: "Haruko 快閃店。逛完搭捷運至西門站", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
-            { title: "3. 韓式拍貼機", time: "Stop 2 (New!)", tag: "拍照留念", desc: "到西門町後，先拍貼留下美美的造型！", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" }, // 使用 Life4Cut 座標
+            { title: "3. 韓式拍貼機", time: "Stop 2", tag: "拍照留念", desc: "到西門町後，先拍貼留下美美的造型！", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" },
             { title: "4. MEAT IN 燒肉", time: "Stop 3", tag: "晚餐", desc: "西門店燒肉放題，吃飽飽準備唱歌", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
             { title: "5. 錢櫃 KTV", time: "Stop 4", tag: "派對", desc: "中華新館，唱到開心為止！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
         ];
 
-        // ... (後續的 JS 程式碼不用改動)
-
-        // --- 1. 初始化行程列表 ---
+        // --- 1. 初始化行程列表 (略過) ---
         const listContainer = document.getElementById('timeline-container');
         itinerary.forEach(item => {
             listContainer.innerHTML += `
                 <div class="timeline-card">
-                    <span class="tag">${item.time}</span>
+                    <span class="tag">${item.tag}</span>
                     <h3>${item.title}</h3>
                     <p>${item.desc}</p>
                 </div>
             `;
         });
 
-        // --- 2. 初始化地圖 ---
-        // 注意：地圖必須在顯示時 resize，否則會破圖。我們在 switchTab 處理。
+        // --- 2. 初始化地圖 (增加捷運圖層！) ---
         const map = L.map('map').setView([25.048, 121.513], 15);
+        
+        // 載入深色底圖
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '© CARTO'
         }).addTo(map);
 
-        const customIconHtml = `<div style="width:20px;height:20px;background:#00E5FF;border-radius:50%;border:3px solid #1E293B;box-shadow:0 0 10px #00E5FF;"></div>`;
+        // ★ 新增捷運/鐵道圖層 (Layer 2)
+        L.tileLayer('https://tile.openstreetmap.tw/rail/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            opacity: 0.9,
+            attribution: '捷運圖層: OpenStreetMap Taiwan Rail'
+        }).addTo(map);
+
+        const customIconHtml = `<div style="width:20px;height:20px;background:var(--primary);border-radius:50%;border:3px solid #1E293B;box-shadow:0 0 10px var(--primary);"></div>`;
         const icon = L.divIcon({ className: 'custom-pin', html: customIconHtml, iconSize: [20, 20] });
 
         itinerary.forEach(item => {
@@ -269,32 +274,26 @@
             marker.bindPopup(`
                 <div style="text-align:center;">
                     <b>${item.title}</b><br>${item.desc}
-                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQuery)}" target="_blank" class="vibe-btn">導航</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQ)}" target="_blank" class="vibe-btn">Google 導航</a>
                 </div>
             `);
         });
 
-        // --- 3. 頁面切換邏輯 ---
+        // --- 3. 頁面切換邏輯 (與 Vibe 2.0 相同) ---
         function switchTab(tabName, navEl) {
-            // 隱藏所有頁面
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // 移除導航激活狀態
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
-            // 顯示目標頁面
             document.getElementById(`page-${tabName}`).classList.add('active');
             navEl.classList.add('active');
 
-            // ★ 關鍵修復：如果是地圖頁，通知 Leaflet 重新計算大小
             if(tabName === 'map') {
                 setTimeout(() => { map.invalidateSize(); }, 100);
             }
         }
 
-        // --- 4. 成員功能 (模擬) ---
+        // --- 4. 成員功能 (與 Vibe 2.0 相同) ---
         const memberListEl = document.getElementById('memberList');
-        
-        // 載入儲存的成員
         let members = JSON.parse(localStorage.getItem('trip_members')) || ['我 (主揪)'];
         renderMembers();
 
