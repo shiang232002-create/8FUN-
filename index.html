@@ -2,212 +2,261 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台北一日爽玩計畫 🚀</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>台北一日城市探險 🗺️</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
     <style>
         :root {
             --primary: #FF0055;
             --secondary: #00E5FF;
             --bg: #0F172A;
-            --card-bg: #1E293B;
+            --card-bg-rgba: rgba(30, 41, 59, 0.85);
             --text: #F8FAFC;
         }
 
         body {
+            padding: 0;
+            margin: 0;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* 地圖滿版容器 */
+        #map {
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+        }
+
+        /* 標題覆蓋層 */
+        .overlay-header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: var(--card-bg-rgba);
+            backdrop-filter: blur(10px);
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            pointer-events: none; /* 讓點擊穿透到地圖 */
         }
 
         h1 {
-            text-align: center;
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 800;
-            margin-bottom: 30px;
-            font-size: 2rem;
+            text-align: center;
         }
 
-        .timeline {
-            max-width: 600px;
-            width: 100%;
-            position: relative;
+        /* 自定義懸浮標記 (Floating Marker) 的樣式 */
+        .custom-marker-container {
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+            transition: transform 0.3s ease;
         }
 
-        /* The vertical line */
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
+        .custom-marker-container:hover {
+             transform: scale(1.05) translateY(-5px);
+             z-index: 1000 !important;
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-            margin-left: 50px; /* Space for the line */
-            position: relative;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.2s, filter 0.3s;
-            cursor: pointer;
+        .marker-card {
+            background: var(--card-bg-rgba);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 160px;
+            border-left: 4px solid var(--secondary);
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-            border-color: var(--secondary);
-        }
-
-        /* The dot on the timeline */
-        .card::before {
-            content: '';
-            position: absolute;
-            left: -38px; /* Adjust based on margin-left */
-            top: 25px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
+        .marker-num {
             background: var(--secondary);
-            border: 4px solid var(--bg);
-            box-shadow: 0 0 10px var(--secondary);
+            color: var(--bg);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
         }
 
-        .card.done {
-            filter: grayscale(1) opacity(0.6);
-            text-decoration: line-through;
+        .marker-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .card.done::before {
-            background: #64748B;
-            box-shadow: none;
+        /* Leaflet Popup 自定義樣式 */
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: var(--card-bg-rgba) !important;
+            backdrop-filter: blur(10px);
+            color: var(--text) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px !important;
         }
 
-        .tag {
+        .leaflet-popup-content {
+            margin: 15px !important;
+        }
+        
+        .leaflet-container a.leaflet-popup-close-button {
+            color: var(--text) !important;
+        }
+
+        .popup-tag {
             display: inline-block;
-            font-size: 0.75rem;
-            padding: 4px 8px;
+            font-size: 0.7rem;
+            padding: 3px 8px;
             border-radius: 12px;
             background: rgba(0, 229, 255, 0.15);
             color: var(--secondary);
             margin-bottom: 8px;
-            font-weight: 600;
         }
-
-        h2 {
-            margin: 0 0 8px 0;
-            font-size: 1.25rem;
-        }
-
-        p {
-            margin: 0 0 16px 0;
+        
+        .popup-desc {
+            font-size: 0.85rem;
             color: #94A3B8;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            margin: 8px 0 15px 0;
+            line-height: 1.4;
         }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(90deg, var(--primary), #FF4D80);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: opacity 0.2s;
-            border: none;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: auto;
+        .btn-nav {
+            display: block;
+            width: 100%;
             text-align: center;
-            font-size: 0.8rem;
-            color: #475569;
-            padding-top: 40px;
+            background: linear-gradient(90deg, var(--primary), #FF4D80);
+            color: white !important;
+            padding: 8px 0;
+            border-radius: 8px;
+            text-decoration: none !important;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
     </style>
 </head>
 <body>
 
-    <h1>🚀 台北一日爽玩行程</h1>
-
-    <div class="timeline" id="app">
-        </div>
-
-    <div class="footer">
-        Tap card to mark as done • Made for You
+    <div class="overlay-header">
+        <h1>🚀 台北一日城市探險</h1>
     </div>
+    
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
+        // 1. 定義行程資料與座標 (Lat, Lng)
         const itinerary = [
             {
-                title: "台北車站 (出發)",
+                id: 1,
+                title: "台北車站",
+                coords: [25.047778, 121.517222],
                 tag: "Start Point 🚩",
-                desc: "建議走中山地下街 (R線方向) 吹冷氣散步過去，約 10-15 分鐘。",
+                desc: "起點！建議走中山地下街 (R線) 往中山站移動，避暑又好逛。",
                 mapQuery: "台北車站"
             },
             {
+                id: 2,
                 title: "誠品生活南西店",
+                coords: [25.052333, 121.521611],
                 tag: "Shopping 🛍️",
-                desc: "Haruko 快閃店！位於捷運中山站 1 號出口旁。逛完搭綠線去西門。",
+                desc: "Haruko 快閃店所在地(中山站旁)。逛完搭綠線直達西門。",
                 mapQuery: "誠品生活南西店"
             },
             {
-                title: "MEAT IN 燒肉時光",
+                id: 3,
+                title: "MEAT IN 燒肉時光 西門店",
+                coords: [25.043917, 121.505944],
                 tag: "Dinner 🥩",
-                desc: "西門店燒肉火鍋放題。大吃一頓補充能量。",
+                desc: "位於西門町邊緣。燒肉火鍋吃到飽，補充體力準備唱歌。",
                 mapQuery: "MEAT IN燒肉時光—燒肉火鍋放題 西門店"
             },
             {
-                title: "錢櫃 KTV (中華新館)",
+                id: 4,
+                title: "錢櫃KTV 台北中華新館",
+                coords: [25.043556, 121.508389],
                 tag: "Party 🎤",
-                desc: "建議預訂中華新館，離燒肉店最近。唱完直接搭捷運回家。",
+                desc: "離燒肉店超近，設備較新。唱完旁邊就是捷運西門站。",
                 mapQuery: "錢櫃台北中華新館"
             }
         ];
 
-        const container = document.getElementById('app');
+        // 2. 初始化地圖
+        // 中心點設在這些地點的中間，縮放層級設為 14 剛好能看到整個區域
+        const map = L.map('map', { zoomControl: false }).setView([25.048, 121.513], 14);
 
-        itinerary.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            
-            // Allow user to toggle 'done' state
-            card.onclick = (e) => {
-                if(e.target.tagName !== 'A') { // Don't toggle if clicking the map button
-                    card.classList.toggle('done');
-                }
-            };
+        // 3. 加入深色系圖資 (使用 CartoDB Dark Matter，非常有質感且免費)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
 
-            card.innerHTML = `
-                <span class="tag">${item.tag}</span>
-                <h2>${item.title}</h2>
-                <p>${item.desc}</p>
-                <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQuery)}" target="_blank" class="btn">
-                    📍 Google Map
-                </a>
+        // 4. 建立自定義懸浮卡片標記 (Custom DivIcon)
+         itinerary.forEach(item => {
+            // 建立自定義 Icon
+            const customIcon = L.divIcon({
+                className: 'custom-marker-container',
+                html: `
+                    <div class="marker-card">
+                        <div class="marker-num">${item.id}</div>
+                        <div class="marker-title">${item.title}</div>
+                    </div>
+                `,
+                iconSize: [180, 44], // 卡片的大小
+                iconAnchor: [90, 50]  // 定位點在卡片的正下方
+            });
+
+            // 建立標記並加入地圖
+            const marker = L.marker(item.coords, {icon: customIcon}).addTo(map);
+
+            // 建立彈出視窗內容
+            const popupContent = `
+                <div>
+                    <span class="popup-tag">${item.tag}</span>
+                    <h3>${item.title}</h3>
+                    <p class="popup-desc">${item.desc}</p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQuery)}" target="_blank" class="btn-nav">
+                        📍 用 Google Maps 導航
+                    </a>
+                </div>
             `;
-            container.appendChild(card);
+
+            // 綁定彈出視窗
+            marker.bindPopup(popupContent, {
+                offset: [0, -40], // 讓彈出視窗在卡片上方
+                closeButton: true,
+                autoPanPadding: [20, 20]
+            });
+            
+            // 點擊標記時，將地圖中心滑動到該點
+            marker.on('click', function() {
+                map.flyTo(item.coords, 16, {
+                    animate: true,
+                    duration: 0.8
+                });
+            });
         });
     </script>
 </body>
