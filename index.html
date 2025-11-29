@@ -231,13 +231,16 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 資料設定 ---
+     // --- 資料設定 (更新後的版本) ---
         const itinerary = [
-            { title: "台北車站 (集合)", time: "Start", tag: "集合點", desc: "中山地下街R線方向出發", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
-            { title: "誠品生活南西店", time: "Stop 1", tag: "逛街", desc: "Haruko 快閃店！捷運中山站旁", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
-            { title: "MEAT IN 燒肉", time: "Stop 2", tag: "晚餐", desc: "西門店燒肉放題，大口吃肉", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
-            { title: "錢櫃 KTV", time: "Stop 3", tag: "派對", desc: "中華新館，唱完解散！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
+            { title: "1. 台北車站 (集合)", time: "Start", tag: "集合點", desc: "走中山地下街R線往中山站出發", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
+            { title: "2. 誠品生活南西店", time: "Stop 1", tag: "逛街", desc: "Haruko 快閃店。逛完搭捷運至西門站", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
+            { title: "3. 韓式拍貼機", time: "Stop 2 (New!)", tag: "拍照留念", desc: "到西門町後，先拍貼留下美美的造型！", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" }, // 使用 Life4Cut 座標
+            { title: "4. MEAT IN 燒肉", time: "Stop 3", tag: "晚餐", desc: "西門店燒肉放題，吃飽飽準備唱歌", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
+            { title: "5. 錢櫃 KTV", time: "Stop 4", tag: "派對", desc: "中華新館，唱到開心為止！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
         ];
+
+        // ... (後續的 JS 程式碼不用改動)
 
         // --- 1. 初始化行程列表 ---
         const listContainer = document.getElementById('timeline-container');
