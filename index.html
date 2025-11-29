@@ -2,262 +2,332 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>台北一日城市探險 🗺️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>台北爽玩團 🚀</title>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
             --primary: #FF0055;
             --secondary: #00E5FF;
             --bg: #0F172A;
-            --card-bg-rgba: rgba(30, 41, 59, 0.85);
+            --card-bg: #1E293B;
+            --nav-bg: #162032;
             --text: #F8FAFC;
         }
 
-        body {
-            padding: 0;
-            margin: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-        }
+        * { box-sizing: border-box; }
 
-        /* 地圖滿版容器 */
-        #map {
+        body, html {
             height: 100%;
-            width: 100%;
-            z-index: 1;
-        }
-
-        /* 標題覆蓋層 */
-        .overlay-header {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background: var(--card-bg-rgba);
-            backdrop-filter: blur(10px);
-            padding: 10px 25px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            pointer-events: none; /* 讓點擊穿透到地圖 */
-        }
-
-        h1 {
             margin: 0;
-            font-size: 1.2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden; /* Prevent body scroll, handle inside pages */
+        }
+
+        /* --- 頁面容器與切換邏輯 --- */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px); /* Leave space for bottom nav */
+            overflow-y: auto;
+            display: none; /* Hidden by default */
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* 特別處理地圖頁面，不需要 padding */
+        #page-map {
+            padding: 0;
+            height: calc(100% - 70px);
+        }
+
+        /* --- 底部導航列 --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--nav-bg);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-item.active {
+            color: var(--secondary);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        /* --- 行程卡片樣式 (列表頁) --- */
+        .timeline-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .timeline-card h3 { margin: 0 0 5px 0; }
+        .timeline-card p { color: #94A3B8; font-size: 0.9rem; margin: 0; }
+        .tag { 
+            background: rgba(255, 0, 85, 0.15); 
+            color: var(--primary); 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            margin-bottom: 8px; 
+            display: inline-block;
+        }
+
+        /* --- 成員頁面樣式 --- */
+        .team-header {
             text-align: center;
+            margin-bottom: 30px;
         }
-
-        /* 自定義懸浮標記 (Floating Marker) 的樣式 */
-        .custom-marker-container {
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
-            transition: transform 0.3s ease;
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-
-        .custom-marker-container:hover {
-             transform: scale(1.05) translateY(-5px);
-             z-index: 1000 !important;
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0F172A;
+            color: white;
         }
-
-        .marker-card {
-            background: var(--card-bg-rgba);
-            backdrop-filter: blur(8px);
+        button.btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .member-list {
+            list-style: none;
+            padding: 0;
+        }
+        .member-item {
+            background: var(--card-bg);
+            padding: 15px;
             border-radius: 12px;
-            padding: 10px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            min-width: 160px;
-            border-left: 4px solid var(--secondary);
+            gap: 15px;
         }
-
-        .marker-num {
-            background: var(--secondary);
-            color: var(--bg);
-            width: 24px;
-            height: 24px;
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-        }
-
-        .marker-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Leaflet Popup 自定義樣式 */
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-            background: var(--card-bg-rgba) !important;
-            backdrop-filter: blur(10px);
-            color: var(--text) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px !important;
-        }
-
-        .leaflet-popup-content {
-            margin: 15px !important;
+            font-size: 1.2rem;
         }
         
-        .leaflet-container a.leaflet-popup-close-button {
-            color: var(--text) !important;
-        }
-
-        .popup-tag {
-            display: inline-block;
-            font-size: 0.7rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-            background: rgba(0, 229, 255, 0.15);
-            color: var(--secondary);
-            margin-bottom: 8px;
-        }
-        
-        .popup-desc {
-            font-size: 0.85rem;
-            color: #94A3B8;
-            margin: 8px 0 15px 0;
-            line-height: 1.4;
-        }
-
-        .btn-nav {
-            display: block;
-            width: 100%;
-            text-align: center;
-            background: linear-gradient(90deg, var(--primary), #FF4D80);
-            color: white !important;
-            padding: 8px 0;
-            border-radius: 8px;
-            text-decoration: none !important;
-            font-size: 0.85rem;
-            font-weight: 600;
+        /* Map Styles override */
+        #map { height: 100%; width: 100%; }
+        .leaflet-popup-content-wrapper { background: var(--card-bg); color: var(--text); }
+        .vibe-btn { 
+            display: block; margin-top:10px; text-align: center; 
+            background: var(--secondary); color: #000 !important; 
+            padding: 5px; border-radius: 5px; text-decoration: none; font-weight: bold;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="overlay-header">
-        <h1>🚀 台北一日城市探險</h1>
+    <div id="page-list" class="page active">
+        <h1 style="text-align: center; margin-bottom: 30px;">📅 行程總覽</h1>
+        <div id="timeline-container">
+            </div>
+        <div style="height: 50px;"></div> </div>
+
+    <div id="page-map" class="page">
+        <div id="map"></div>
     </div>
-    
-    <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <div id="page-team" class="page">
+        <div class="team-header">
+            <h1>👥 爽玩小隊</h1>
+            <p>輸入名字加入行程，並分享給朋友</p>
+        </div>
 
+        <div class="input-group">
+            <input type="text" id="nameInput" placeholder="你的暱稱...">
+            <button class="btn-primary" onclick="addMember()">加入</button>
+        </div>
+
+        <ul class="member-list" id="memberList">
+            </ul>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="btn-primary" style="background: var(--secondary); color: #000; width: 100%;" onclick="shareApp()">
+                📤 複製連結分享給朋友
+            </button>
+            <p style="font-size: 0.8rem; color: #64748B; margin-top: 10px;">
+                (此連結可讓朋友開啟此 App)
+            </p>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('list', this)">
+            <div class="nav-icon">📅</div>
+            <div>行程</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('map', this)">
+            <div class="nav-icon">🗺️</div>
+            <div>地圖</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('team', this)">
+            <div class="nav-icon">👥</div>
+            <div>成員</div>
+        </div>
+    </nav>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 1. 定義行程資料與座標 (Lat, Lng)
+        // --- 資料設定 ---
         const itinerary = [
-            {
-                id: 1,
-                title: "台北車站",
-                coords: [25.047778, 121.517222],
-                tag: "Start Point 🚩",
-                desc: "起點！建議走中山地下街 (R線) 往中山站移動，避暑又好逛。",
-                mapQuery: "台北車站"
-            },
-            {
-                id: 2,
-                title: "誠品生活南西店",
-                coords: [25.052333, 121.521611],
-                tag: "Shopping 🛍️",
-                desc: "Haruko 快閃店所在地(中山站旁)。逛完搭綠線直達西門。",
-                mapQuery: "誠品生活南西店"
-            },
-            {
-                id: 3,
-                title: "MEAT IN 燒肉時光 西門店",
-                coords: [25.043917, 121.505944],
-                tag: "Dinner 🥩",
-                desc: "位於西門町邊緣。燒肉火鍋吃到飽，補充體力準備唱歌。",
-                mapQuery: "MEAT IN燒肉時光—燒肉火鍋放題 西門店"
-            },
-            {
-                id: 4,
-                title: "錢櫃KTV 台北中華新館",
-                coords: [25.043556, 121.508389],
-                tag: "Party 🎤",
-                desc: "離燒肉店超近，設備較新。唱完旁邊就是捷運西門站。",
-                mapQuery: "錢櫃台北中華新館"
-            }
+            { title: "台北車站 (集合)", time: "Start", tag: "集合點", desc: "中山地下街R線方向出發", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
+            { title: "誠品生活南西店", time: "Stop 1", tag: "逛街", desc: "Haruko 快閃店！捷運中山站旁", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
+            { title: "MEAT IN 燒肉", time: "Stop 2", tag: "晚餐", desc: "西門店燒肉放題，大口吃肉", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
+            { title: "錢櫃 KTV", time: "Stop 3", tag: "派對", desc: "中華新館，唱完解散！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
         ];
 
-        // 2. 初始化地圖
-        // 中心點設在這些地點的中間，縮放層級設為 14 剛好能看到整個區域
-        const map = L.map('map', { zoomControl: false }).setView([25.048, 121.513], 14);
-
-        // 3. 加入深色系圖資 (使用 CartoDB Dark Matter，非常有質感且免費)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(map);
-
-        // 4. 建立自定義懸浮卡片標記 (Custom DivIcon)
-         itinerary.forEach(item => {
-            // 建立自定義 Icon
-            const customIcon = L.divIcon({
-                className: 'custom-marker-container',
-                html: `
-                    <div class="marker-card">
-                        <div class="marker-num">${item.id}</div>
-                        <div class="marker-title">${item.title}</div>
-                    </div>
-                `,
-                iconSize: [180, 44], // 卡片的大小
-                iconAnchor: [90, 50]  // 定位點在卡片的正下方
-            });
-
-            // 建立標記並加入地圖
-            const marker = L.marker(item.coords, {icon: customIcon}).addTo(map);
-
-            // 建立彈出視窗內容
-            const popupContent = `
-                <div>
-                    <span class="popup-tag">${item.tag}</span>
+        // --- 1. 初始化行程列表 ---
+        const listContainer = document.getElementById('timeline-container');
+        itinerary.forEach(item => {
+            listContainer.innerHTML += `
+                <div class="timeline-card">
+                    <span class="tag">${item.time}</span>
                     <h3>${item.title}</h3>
-                    <p class="popup-desc">${item.desc}</p>
-                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQuery)}" target="_blank" class="btn-nav">
-                        📍 用 Google Maps 導航
-                    </a>
+                    <p>${item.desc}</p>
                 </div>
             `;
-
-            // 綁定彈出視窗
-            marker.bindPopup(popupContent, {
-                offset: [0, -40], // 讓彈出視窗在卡片上方
-                closeButton: true,
-                autoPanPadding: [20, 20]
-            });
-            
-            // 點擊標記時，將地圖中心滑動到該點
-            marker.on('click', function() {
-                map.flyTo(item.coords, 16, {
-                    animate: true,
-                    duration: 0.8
-                });
-            });
         });
+
+        // --- 2. 初始化地圖 ---
+        // 注意：地圖必須在顯示時 resize，否則會破圖。我們在 switchTab 處理。
+        const map = L.map('map').setView([25.048, 121.513], 15);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© CARTO'
+        }).addTo(map);
+
+        const customIconHtml = `<div style="width:20px;height:20px;background:#00E5FF;border-radius:50%;border:3px solid #1E293B;box-shadow:0 0 10px #00E5FF;"></div>`;
+        const icon = L.divIcon({ className: 'custom-pin', html: customIconHtml, iconSize: [20, 20] });
+
+        itinerary.forEach(item => {
+            const marker = L.marker([item.lat, item.lng], {icon: icon}).addTo(map);
+            marker.bindPopup(`
+                <div style="text-align:center;">
+                    <b>${item.title}</b><br>${item.desc}
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQuery)}" target="_blank" class="vibe-btn">導航</a>
+                </div>
+            `);
+        });
+
+        // --- 3. 頁面切換邏輯 ---
+        function switchTab(tabName, navEl) {
+            // 隱藏所有頁面
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // 移除導航激活狀態
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // 顯示目標頁面
+            document.getElementById(`page-${tabName}`).classList.add('active');
+            navEl.classList.add('active');
+
+            // ★ 關鍵修復：如果是地圖頁，通知 Leaflet 重新計算大小
+            if(tabName === 'map') {
+                setTimeout(() => { map.invalidateSize(); }, 100);
+            }
+        }
+
+        // --- 4. 成員功能 (模擬) ---
+        const memberListEl = document.getElementById('memberList');
+        
+        // 載入儲存的成員
+        let members = JSON.parse(localStorage.getItem('trip_members')) || ['我 (主揪)'];
+        renderMembers();
+
+        function addMember() {
+            const input = document.getElementById('nameInput');
+            const name = input.value.trim();
+            if(name) {
+                members.push(name);
+                localStorage.setItem('trip_members', JSON.stringify(members));
+                renderMembers();
+                input.value = '';
+                alert(`歡迎 ${name} 加入行程！`);
+            }
+        }
+
+        function renderMembers() {
+            memberListEl.innerHTML = '';
+            members.forEach(m => {
+                const initial = m.charAt(0).toUpperCase();
+                memberListEl.innerHTML += `
+                    <li class="member-item">
+                        <div class="avatar">${initial}</div>
+                        <span>${m}</span>
+                    </li>
+                `;
+            });
+        }
+
+        function shareApp() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('連結已複製！貼給朋友叫他們加入！');
+            }).catch(err => {
+                prompt("請複製此連結傳給朋友：", url);
+            });
+        }
     </script>
 </body>
 </html>
