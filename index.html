@@ -3,72 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台北爽玩團 🚀 (捷運最終版)</title>
+    <title>台北爽玩團 🚀 (深色主題)</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* 主題色調維持不變，但地圖背景變淺色 */
             --primary: #FF0055;
             --secondary: #00E5FF;
-            --bg: #0F172A;
+            --bg: #0F172A; /* 深色背景 */
             --card-bg: #1E293B;
             --nav-bg: #162032;
-            --text: #F8FAFC;
+            --text: #F8FAFC; /* 亮色文字 */
         }
 
-        /* 為了讓捷運線更清楚，將頁面容器改為白底，卡片維持深色 */
+        * { box-sizing: border-box; }
+
         body, html {
             height: 100%;
             margin: 0;
             font-family: 'Noto Sans TC', sans-serif;
-            background: #f1f5f9; /* 淺色背景 */
-            color: var(--text);
+            background: var(--bg); /* 主體深色 */
+            color: var(--text); /* 主體亮色文字 */
             overflow: hidden; 
         }
-        
-        /* 列表頁的內容必須是深色文字 */
-        #page-list h1, #page-team h1 {
-             /* 讓標題顏色漸變 */
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* 讓列表頁的字體變回深色 */
-        #page-list, #page-team {
-            color: #1e293b; 
-        }
-        
-        /* 行程卡片內的文字維持亮色 */
-        .timeline-card {
-            background: var(--card-bg);
-            color: var(--text); 
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
 
-        .timeline-card p {
-            color: #94A3B8;
-        }
-        
-        .page {
-            /* 淺色頁面背景 */
-            background: #f1f5f9; 
-        }
-
-        /* Map Styles override */
-        #map { height: 100%; width: 100%; }
-        /* 讓地圖上的彈出卡片維持 Vibe 風格 */
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip { 
-            background: var(--card-bg); 
-            color: var(--text);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-        }
-        
-        /* 其餘 Vibe App 2.0 樣式... (略) */
         /* --- 頁面容器與切換邏輯 --- */
         .page {
             position: absolute;
@@ -81,6 +41,7 @@
             padding: 20px;
             opacity: 0;
             transition: opacity 0.3s ease;
+            background: var(--bg); /* 頁面背景深色 */
         }
 
         .page.active {
@@ -93,7 +54,20 @@
             height: calc(100% - 70px);
         }
 
-        /* --- 底部導航列 --- */
+        /* 標題漸變色 */
+        #page-list h1, #page-team h1 {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* 成員頁的輔助文字顏色 */
+        #page-team p {
+            color: #94A3B8;
+        }
+
+
+        /* --- 底部導航列 (與 Vibe 4.0 相同) --- */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -130,8 +104,31 @@
             font-size: 1.5rem;
             margin-bottom: 4px;
         }
-        
-        /* --- 成員頁面樣式 --- */
+
+        /* --- 行程卡片樣式 (與 Vibe 4.0 相同) --- */
+        .timeline-card {
+            background: var(--card-bg);
+            color: var(--text); 
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .timeline-card h3 { margin: 0 0 5px 0; }
+        .timeline-card p { color: #94A3B8; font-size: 0.9rem; margin: 0; }
+        .tag { 
+            background: rgba(255, 0, 85, 0.15); 
+            color: var(--primary); 
+            padding: 2px 8px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            margin-bottom: 8px; 
+            display: inline-block;
+        }
+
+        /* --- 成員頁面樣式 (與 Vibe 4.0 相同) --- */
         .team-header {
             text-align: center;
             margin-bottom: 30px;
@@ -170,7 +167,7 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            color: var(--text); /* 確保成員列表文字是亮的 */
+            color: var(--text); 
         }
         .avatar {
             width: 40px;
@@ -185,6 +182,15 @@
             color: var(--bg);
         }
 
+        /* Map Styles override */
+        #map { height: 100%; width: 100%; }
+        /* 讓地圖上的彈出卡片維持 Vibe 風格 */
+        .leaflet-popup-content-wrapper { 
+            background: var(--card-bg); 
+            color: var(--text);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        
         .vibe-btn { 
             display: block; margin-top:10px; text-align: center; 
             background: var(--secondary); color: #000 !important; 
@@ -209,7 +215,7 @@
     <div id="page-team" class="page">
         <div class="team-header">
             <h1>👥 爽玩小隊</h1>
-            <p style="color:#475569">輸入名字加入行程，並分享給朋友</p>
+            <p>輸入名字加入行程，並分享給朋友</p>
         </div>
 
         <div class="input-group">
@@ -224,7 +230,7 @@
             <button class="btn-primary" style="background: var(--secondary); color: #000; width: 100%;" onclick="shareApp()">
                 📤 複製連結分享給朋友
             </button>
-            <p style="font-size: 0.8rem; color: #475569; margin-top: 10px;">
+            <p style="font-size: 0.8rem; color: #94A3B8; margin-top: 10px;">
                 (此連結可讓朋友開啟此 App)
             </p>
         </div>
@@ -247,7 +253,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 資料設定 (增加大創，並調整順序) ---
+        // --- 資料設定 (最終版) ---
         const itinerary = [
             { title: "1. 台北車站 (集合)", time: "Start", tag: "集合點", desc: "走中山地下街R線往中山站出發", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
             { title: "2. 大創 (DAISO)", time: "Stop 1", tag: "購物", desc: "新光三越南西店本館，先補給小物！", lat: 25.0519, lng: 121.5209, mapQ: "大創 新光三越南西店" }, 
@@ -269,18 +275,18 @@
             `;
         });
 
-        // --- 2. 初始化地圖 (關鍵修正：改用淺色地圖與調整捷運線圖層) ---
+        // --- 2. 初始化地圖 (保留淺色底圖以顯示深色捷運線) ---
         const map = L.map('map').setView([25.048, 121.513], 15);
         
-        // ★ 關鍵修正：改用 OSM 淺色地圖，讓捷運線更清晰
+        // 保留 OSM 淺色地圖底圖，讓捷運線清晰可見
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
         }).addTo(map);
 
-        // ★ 捷運/鐵道圖層 (提高不透明度)
+        // 捷運/鐵道圖層
         L.tileLayer('https://tile.openstreetmap.tw/rail/{z}/{x}/{y}.png', {
             maxZoom: 18,
-            opacity: 1, // 提高不透明度，讓線路更明顯
+            opacity: 1, 
             attribution: '捷運圖層: OpenStreetMap Taiwan Rail'
         }).addTo(map);
 
