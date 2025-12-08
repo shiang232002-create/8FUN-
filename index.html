@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>台北爽玩團 🚀 (最終版)</title>
+    <title>台北藍線爽玩團 🚀</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
             overflow: hidden; 
         }
 
-        /* --- 頁面容器與切換邏輯 --- */
+        /* --- 頁面容器 --- */
         .page {
             position: absolute;
             top: 0;
@@ -49,10 +49,7 @@
             opacity: 1;
         }
 
-        #page-map {
-            padding: 0;
-            height: calc(100% - 70px);
-        }
+        #page-map { padding: 0; height: calc(100% - 70px); }
 
         /* 標題漸變色 */
         #page-list h1, #page-info h1, #page-draw h1 {
@@ -61,10 +58,7 @@
             -webkit-text-fill-color: transparent;
         }
         
-        /* 輔助文字顏色 */
-        #page-info p, #page-draw p {
-            color: #94A3B8;
-        }
+        #page-info p, #page-draw p { color: #94A3B8; }
 
         /* --- 底部導航列 --- */
         .bottom-nav {
@@ -95,114 +89,54 @@
             height: 100%;
         }
 
-        .nav-item.active {
-            color: var(--secondary);
-        }
+        .nav-item.active { color: var(--secondary); }
+        .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
 
-        .nav-icon {
-            font-size: 1.5rem;
-            margin-bottom: 4px;
-        }
-
-        /* --- 行程卡片樣式 (新增時間軸) --- */
-        #timeline-container {
-            position: relative;
-            padding-left: 50px; /* 為時間軸預留空間 */
-        }
-        
-        /* 時間軸線條 */
+        /* --- 行程卡片 (時間軸) --- */
+        #timeline-container { position: relative; padding-left: 50px; }
         #timeline-container::before {
-            content: '';
-            position: absolute;
-            top: 10px;
-            bottom: 10px;
-            left: 20px;
-            width: 3px;
+            content: ''; position: absolute; top: 10px; bottom: 10px; left: 20px; width: 3px;
             background: linear-gradient(to bottom, var(--primary), var(--secondary));
         }
 
         .timeline-card {
             background: var(--card-bg);
             color: var(--text); 
-            border-left: none; /* 移除舊的 border-left */
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             margin-bottom: 20px;
             border-radius: 16px;
             padding: 15px;
             position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         
-        /* 時間點圓點 */
         .timeline-card::before {
-            content: '';
-            position: absolute;
-            top: 25px;
-            left: -38px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--secondary);
-            border: 3px solid var(--bg);
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
-            z-index: 10;
+            content: ''; position: absolute; top: 25px; left: -38px; width: 12px; height: 12px;
+            border-radius: 50%; background: var(--secondary); border: 3px solid var(--bg);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5); z-index: 10;
         }
 
-        .time-slot {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: var(--primary); /* 時間使用主色 */
-            margin-bottom: 5px;
-        }
-        
-        /* 移除最末尾圓點的線條 */
-        .timeline-card:last-child::before {
-            background: var(--primary);
-        }
-        #timeline-container .timeline-card:last-child + style {
-             /* 嘗試隱藏最後一條線，但複雜，先用圓點區分 */
-        }
+        .time-slot { font-size: 0.9rem; font-weight: bold; color: var(--primary); margin-bottom: 5px; }
+        .tag { background: rgba(255, 0, 85, 0.15); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 8px; display: inline-block; }
+        .timeline-card h3 { margin: 0 0 5px 0; }
+        .timeline-card p { color: #94A3B8; font-size: 0.9rem; margin: 0; }
 
-
-        /* --- 抽籤頁面樣式 (NEW) --- */
-        .draw-container {
-            text-align: center;
-            padding-top: 30px;
-        }
-        #draw-result {
-            margin-top: 40px;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: 12px;
-        }
-        .result-item {
-            padding: 10px 0;
-            border-bottom: 1px dashed #334155;
-            font-size: 1.1rem;
-        }
+        /* --- 抽籤頁面 --- */
+        .draw-container { text-align: center; padding-top: 30px; }
+        #draw-result { margin-top: 40px; padding: 20px; background: var(--card-bg); border-radius: 12px; }
+        .result-item { padding: 10px 0; border-bottom: 1px dashed #334155; font-size: 1.1rem; }
         .result-item:last-child { border-bottom: none; }
         .giver-name { color: var(--secondary); font-weight: bold; }
         .receiver-name { color: var(--primary); font-weight: bold; }
 
-        /* 抽籤按鈕樣式 */
         .draw-button {
             background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: var(--bg);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
-            transition: all 0.3s;
+            color: var(--bg); border: none; padding: 15px 30px; border-radius: 10px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4); transition: all 0.3s;
         }
-        .draw-button:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 5px rgba(255, 0, 85, 0.4);
-        }
+        .draw-button:active { transform: scale(0.98); }
 
-        /* --- 舊樣式保留 --- */
-        /* ... 行前須知頁面樣式 (略) ... */
+        /* --- 其他樣式 --- */
         .info-header { text-align: center; margin-bottom: 30px; }
         .image-header { width: calc(100% + 40px); margin: -20px -20px 20px -20px; overflow: hidden; border-bottom: 4px solid var(--secondary); }
         .image-header img { display: block; width: 100%; height: auto; }
@@ -215,15 +149,13 @@
         .leaflet-popup-content-wrapper { background: var(--card-bg); color: var(--text); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); }
         .vibe-btn { display: block; margin-top:10px; text-align: center; background: var(--secondary); color: #000 !important; padding: 5px; border-radius: 5px; text-decoration: none; font-weight: bold; }
 
-
     </style>
 </head>
 <body>
 
     <div id="page-list" class="page active">
         <h1 style="text-align: center; margin-bottom: 30px;">📅 行程時間軸</h1>
-        <div id="timeline-container">
-            </div>
+        <div id="timeline-container"></div>
         <div style="height: 50px;"></div>
     </div>
 
@@ -232,24 +164,16 @@
     </div>
 
     <div id="page-info" class="page">
-        
         <div class="image-header">
-            <img src="https://i.imgur.com/your_image_url.jpg" alt="Sanrio Family 三麗鷗明星介紹">
+            <img src="https://i.imgur.com/your_image_url.jpg" alt="Sanrio Family">
         </div>
-
         <div class="info-header" style="margin-top: 20px;">
             <h1>📋 行前須知 / 提醒</h1>
             <p>請各位隊員確認自己的任務與裝扮！</p>
         </div>
-
-        <ul class="member-list" id="reminderList">
-            </ul>
-        
+        <ul class="member-list" id="reminderList"></ul>
         <div style="margin-top: 30px; text-align: center;">
-            <p style="font-size: 0.9rem; color: #94A3B8; margin-top: 10px;">
-                點擊下方連結可複製此行程網址給其他隊友
-            </p>
-            <button class="btn-primary" style="background: var(--secondary); color: #000; width: 100%;" onclick="shareApp()">
+            <button class="btn-primary" style="background: var(--secondary); color: #000; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;" onclick="shareApp()">
                 📤 複製連結分享給隊友
             </button>
         </div>
@@ -258,54 +182,35 @@
     <div id="page-draw" class="page">
         <div class="draw-container">
             <h1>🎁 交換禮物抽籤</h1>
-            <p>本次抽籤於 <span style="color:var(--primary)">大創 (DAISO)</span> 進行！</p>
-            
-            <button class="draw-button" onclick="startDraw()">
-                立即開始抽籤！
-            </button>
-            
+            <p>本次抽籤於 <span style="color:var(--primary)">大創 (忠孝敦化)</span> 進行！</p>
+            <button class="draw-button" onclick="startDraw()">立即開始抽籤！</button>
             <div id="draw-result">
-                <p style="color:#94A3B8; margin-top:0;">
-                    請點擊上方按鈕進行抽籤。抽籤結果將顯示誰要送禮物給誰。
-                </p>
+                <p style="color:#94A3B8; margin-top:0;">請點擊上方按鈕進行抽籤。</p>
             </div>
         </div>
     </div>
 
-
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('list', this)">
-            <div class="nav-icon">📅</div>
-            <div>行程</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('map', this)">
-            <div class="nav-icon">🗺️</div>
-            <div>地圖</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('info', this)">
-            <div class="nav-icon">📋</div>
-            <div>須知</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('draw', this)">
-            <div class="nav-icon">🎲</div>
-            <div>抽籤</div>
-        </div>
+        <div class="nav-item active" onclick="switchTab('list', this)"><div class="nav-icon">📅</div><div>行程</div></div>
+        <div class="nav-item" onclick="switchTab('map', this)"><div class="nav-icon">🗺️</div><div>地圖</div></div>
+        <div class="nav-item" onclick="switchTab('info', this)"><div class="nav-icon">📋</div><div>須知</div></div>
+        <div class="nav-item" onclick="switchTab('draw', this)"><div class="nav-icon">🎲</div><div>抽籤</div></div>
     </nav>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // --- 行程資料 (更新時間軸：最終確定版) ---
+        // --- 行程資料 (全新藍線版) ---
         const itinerary = [
-            { title: "1. 台北車站 (個人出發)", time: "12:20", tag: "移動", desc: "捷運約 10 分鐘抵達中山站集合", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
-            { title: "2. 中山站 (集合點)", time: "12:30", tag: "集合", desc: "隊伍在捷運中山站附近集合！", lat: 25.0519, lng: 121.5209, mapQ: "捷運中山站" },
-            { title: "3. 大創 (DAISO) ＆ 抽籤", time: "12:30 ~ 14:00", tag: "購物/交換", desc: "在新光三越南西店採買，並進行交換禮物抽籤！ (90分鐘)", lat: 25.0519, lng: 121.5209, mapQ: "大創 新光三越南西店" }, 
-            { title: "4. 誠品生活南西店", time: "14:00 ~ 15:00", tag: "逛街", desc: "Haruko 快閃店。逛完從中山站搭捷運至西門站 (60分鐘)", lat: 25.0524, lng: 121.5207, mapQ: "誠品生活南西店" },
-            { title: "5. 韓式拍貼機", time: "15:20 ~ 16:30", tag: "拍照留念", desc: "搭捷運到西門町後，直奔 Life4Cut 拍貼！ (40分鐘)", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" },
-            { title: "6. MEAT IN 燒肉", time: "16:30 ~ 18:30", tag: "晚餐", desc: "提前享用燒肉放題，吃飽飽。 (120分鐘)包含走10分鐘到ktv", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
-            { title: "7. 錢櫃 KTV", time: "18:30 ~ 21:30", tag: "派對", desc: "中華新館，歡唱 3 小時，完美結束行程！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
+            { title: "1. 台北車站 (個人出發)", time: "12:15", tag: "移動", desc: "搭乘捷運板南線(藍線)，約20分鐘抵達市政府站。", lat: 25.0473, lng: 121.5171, mapQ: "台北車站" },
+            { title: "2. 市政府站 (集合點)", time: "12:35", tag: "集合", desc: "「市政府站」3號出口集合，不要遲到喔！", lat: 25.0411, lng: 121.5653, mapQ: "捷運市政府站3號出口" },
+            { title: "3. 信義新天地 A11", time: "12:40 ~ 14:00", tag: "逛街", desc: "進攻 3F 寶可夢中心 & 1F SHIRO！(80分鐘)", lat: 25.0355, lng: 121.5663, mapQ: "新光三越 台北信義新天地A11" },
+            { title: "4. 大創 (交換禮物)", time: "14:20 ~ 15:20", tag: "交換禮物", desc: "搭捷運到忠孝敦化(3號出口)。在大創買買+抽籤交換禮物！", lat: 25.0416, lng: 121.5515, mapQ: "DAISO大創百貨 台北明曜店" },
+            { title: "5. Life4Cut 拍貼機", time: "15:30 ~ 16:30", tag: "移動/拍照", desc: "移動到西門町站，直奔 Life4Cut 留下回憶！", lat: 25.0445, lng: 121.5082, mapQ: "Life4Cut 人生四格 西門店" },
+            { title: "6. MEAT IN 燒肉", time: "16:30 ~ 18:30", tag: "晚餐", desc: "西門店燒肉放題，吃飽喝足。", lat: 25.0448, lng: 121.5068, mapQ: "MEAT IN燒肉時光—燒肉火鍋放題 西門店" },
+            { title: "7. 錢櫃 KTV", time: "18:30 ~ 21:30", tag: "派對", desc: "中華新館，歡唱 3 小時！Happy Ending！", lat: 25.0441, lng: 121.5090, mapQ: "錢櫃台北中華新館" }
         ];
 
-        // --- 行前須知資料 (用於抽籤) ---
+        // --- 行前須知資料 ---
         const reminders = [
             { name: "壽司小朋友 (酷企鵝)", note: "無特別任務。", icon: "😎" },
             { name: "嘟嘟號 (山姆企鵝)", note: "需帶 <span class='warning'>3 人份髮夾</span> 前往。", icon: "🐧" },
@@ -314,13 +219,11 @@
             { name: "小桃 (美樂蒂)", note: "無特別任務", icon: "🎀🐰" }
         ];
         
-        // 從 reminders 提取成員名字用於抽籤
         const members = reminders.map(r => r.name);
 
-
-        // --- 1. 初始化行程列表 (更新顯示時間軸) ---
+        // --- 1. 初始化列表 ---
         const listContainer = document.getElementById('timeline-container');
-        listContainer.innerHTML = ''; // 清空舊內容
+        listContainer.innerHTML = '';
         itinerary.forEach(item => {
             listContainer.innerHTML += `
                 <div class="timeline-card">
@@ -332,8 +235,9 @@
             `;
         });
         
-        // --- 2. 初始化地圖 (不變) ---
-        const map = L.map('map').setView([25.048, 121.513], 15);
+        // --- 2. 初始化地圖 ---
+        // 調整中心點到 忠孝復興/忠孝敦化 中間，以便同時看到信義區和西門町
+        const map = L.map('map').setView([25.041, 121.54], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors'}).addTo(map);
         L.tileLayer('https://tile.openstreetmap.tw/rail/{z}/{x}/{y}.png', { maxZoom: 18, opacity: 1, attribution: '捷運圖層: OpenStreetMap Taiwan Rail'}).addTo(map);
         const customIconHtml = `<div style="width:20px;height:20px;background:var(--primary);border-radius:50%;border:3px solid #fff;box-shadow:0 0 10px var(--primary);"></div>`;
@@ -348,27 +252,20 @@
             `);
         });
 
-        // --- 3. 初始化行前須知列表 (不變) ---
+        // --- 3. 初始化須知 ---
         const reminderListEl = document.getElementById('reminderList');
         reminderListEl.innerHTML = '';
         reminders.forEach(r => {
-            reminderListEl.innerHTML += `
-                <li class="reminder-item">
-                    <div class="member-name">${r.icon} ${r.name}</div>
-                    <div class="note">${r.note}</div>
-                </li>
-            `;
+            reminderListEl.innerHTML += `<li class="reminder-item"><div class="member-name">${r.icon} ${r.name}</div><div class="note">${r.note}</div></li>`;
         });
 
-
-        // --- 4. 抽籤功能 (NEW) ---
+        // --- 4. 抽籤邏輯 ---
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
-        
         function startDraw() {
             const givers = [...members];
             const receivers = [...members];
@@ -380,13 +277,12 @@
             while (!drawSuccess && attempts < maxAttempts) {
                 attempts++;
                 drawSuccess = true;
-                shuffle(givers); // 重新洗牌
+                shuffle(givers);
                 shuffle(receivers);
                 results = {};
-
                 for (let i = 0; i < givers.length; i++) {
                     if (givers[i] === receivers[i]) {
-                        drawSuccess = false; // 有人抽到自己，重新抽籤
+                        drawSuccess = false;
                         break;
                     }
                     results[givers[i]] = receivers[i];
@@ -395,54 +291,32 @@
 
             const resultDiv = document.getElementById('draw-result');
             let resultHTML = '<h3 style="color:var(--text)">🎉 抽籤結果 🎉</h3><div style="margin-top:20px;">';
-            
             if (drawSuccess) {
                 for (const giver in results) {
-                    resultHTML += `
-                        <div class="result-item">
-                            <span class="giver-name">${giver.split(' ')[0]}</span> 
-                            送給 
-                            <span class="receiver-name">${results[giver].split(' ')[0]}</span>
-                        </div>
-                    `;
+                    resultHTML += `<div class="result-item"><span class="giver-name">${giver.split(' ')[0]}</span> 送給 <span class="receiver-name">${results[giver].split(' ')[0]}</span></div>`;
                 }
                 resultHTML += '</div>';
             } else {
                 resultHTML = '<p style="color:var(--primary)">抽籤失敗，請再試一次。</p>';
             }
-
             resultDiv.innerHTML = resultHTML;
             document.querySelector('.draw-button').textContent = "重新抽籤";
         }
 
-
-        // --- 5. 頁面切換邏輯 ---
+        // --- 5. 頁面切換 ---
         function switchTab(tabName, navEl) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
             document.getElementById(`page-${tabName}`).classList.add('active');
             navEl.classList.add('active');
-
-            if(tabName === 'map') {
-                setTimeout(() => { map.invalidateSize(); }, 100);
-            }
+            if(tabName === 'map') { setTimeout(() => { map.invalidateSize(); }, 100); }
         }
 
-        // --- 6. 分享功能 ---
+        // --- 6. 分享 ---
         function shareApp() {
             const url = window.location.href;
-            navigator.clipboard.writeText(url).then(() => {
-                alert('行程連結已複製！');
-            }).catch(err => {
-                prompt("請複製此連結傳給隊友：", url);
-            });
+            navigator.clipboard.writeText(url).then(() => { alert('行程連結已複製！'); }).catch(err => { prompt("請複製此連結傳給隊友：", url); });
         }
     </script>
 </body>
 </html>
-
-
-
-
-
